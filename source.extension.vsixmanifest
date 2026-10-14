@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="UsdBrepViewport.6c55c61b-9857-49e7-a8e5-775c98500103" Version="0.1.9" Language="en-US" Publisher="Local Prototype" />
+    <DisplayName>USD BRep Viewport</DisplayName>
+    <Description xml:space="preserve">Dockable Visual Studio viewport for Python scripts using NVIDIA USD BRep.</Description>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0,17.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[16.0,17.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[16.0,17.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,18.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[17.0,18.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[17.0,18.0)" />
+  </Installation>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,18.0)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="UsdBrepViewport" Path="|UsdBrepViewport;PkgdefProjectOutputGroup|" />
+  </Assets>
+</PackageManifest>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Commands package="guidUsdBrepViewportPackage">
+    <Buttons>
+      <Button guid="guidUsdBrepViewportCommandSet" id="ShowViewport" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+        <Strings>
+          <ButtonText>USD BRep Viewport</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+  <Symbols>
+    <GuidSymbol name="guidUsdBrepViewportPackage" value="{6c55c61b-9857-49e7-a8e5-775c98500103}" />
+    <GuidSymbol name="guidUsdBrepViewportCommandSet" value="{52ac8928-8fbe-4de5-8b35-c1f7403031a5}">
+      <IDSymbol name="ShowViewport" value="0x0100" />
+    </GuidSymbol>
+    <GuidSymbol name="guidSHLMainMenu" value="{d309f791-903f-11d0-9efc-00a0c911004f}">
+      <IDSymbol name="IDG_VS_WNDO_OTRWNDWS1" value="0x019F" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

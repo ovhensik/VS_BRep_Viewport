@@ -1,0 +1,6 @@
+bin/
+obj/
+artifacts/
+*.vsix
+*.user
+*.suo
