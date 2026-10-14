@@ -20,11 +20,14 @@ namespace UsdBrepViewport
 {
     internal sealed class ViewportControl : UserControl
     {
+        private const int MaxWireframeEdges = 200000;
         private readonly TextBox _repoPath;
         private readonly TextBlock _status;
+        private readonly System.Windows.Controls.Primitives.ToggleButton _wireframeButton;
         private readonly Viewport3D _viewport;
         private readonly Model3DGroup _scene;
         private readonly PerspectiveCamera _camera;
+        private GeometryModel3D _wireframeModel;
         private Point _lastMouse;
         private bool _dragging;
         private double _azimuth = 35.0;
@@ -52,9 +55,9 @@ namespace UsdBrepViewport
             var run = new Button { Content = "Run Active Python File", Padding = new Thickness(10, 5, 10, 5), Margin = new Thickness(0, 0, 8, 0) };
             run.Click += async (s, e) => await RunActiveScriptAsync();
             actions.Children.Add(run);
-            var reset = new Button { Content = "Home View", Padding = new Thickness(10, 5, 10, 5) };
-            reset.Click += (s, e) => SetCamera(_target, _distance);
-            actions.Children.Add(reset);
+            _wireframeButton = new System.Windows.Controls.Primitives.ToggleButton { Content = "Wireframe", Padding = new Thickness(10, 5, 10, 5), IsChecked = false };
+            _wireframeButton.Click += (s, e) => UpdateWireframeVisibility();
+            actions.Children.Add(_wireframeButton);
             _status = new TextBlock { Text = "Open a Python file, assign its output to `result`, then run it.", Foreground = Brushes.Gainsboro, Margin = new Thickness(12, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, TextWrapping = TextWrapping.Wrap };
             actions.Children.Add(_status);
             header.Children.Add(actions);
@@ -226,9 +229,68 @@ namespace UsdBrepViewport
             _scene.Children.Add(new DirectionalLight(Color.FromRgb(245, 245, 245), new Vector3D(-1, -2, -3)));
             _scene.Children.Add(new DirectionalLight(Color.FromRgb(90, 110, 145), new Vector3D(2, 1, 1)));
             _scene.Children.Add(new GeometryModel3D(mesh, material) { BackMaterial = material });
+            _wireframeModel = null;
+            var edgeCount = 0;
+            if (data.ContainsKey("edges") && data["edges"] is System.Collections.IEnumerable)
+            {
+                var edges = ((System.Collections.IEnumerable)data["edges"]).Cast<object>().Select(value => Convert.ToDouble(value, CultureInfo.InvariantCulture)).ToArray();
+                edgeCount = edges.Length / 6;
+                _wireframeModel = BuildWireframe(edges, span * 0.0009);
+            }
+            UpdateWireframeVisibility();
             _target = center;
             SetCamera(center, span * 2.8);
             _status.Text = string.Format(CultureInfo.InvariantCulture, "Loaded {0:N0} triangles", triangles.Length / 3);
+            if (edgeCount > MaxWireframeEdges)
+                _status.Text += string.Format(CultureInfo.InvariantCulture, " (wireframe shows the first {0:N0} of {1:N0} edges)", MaxWireframeEdges, edgeCount);
+        }
+
+        private void UpdateWireframeVisibility()
+        {
+            if (_wireframeModel == null) return;
+            _scene.Children.Remove(_wireframeModel);
+            if (_wireframeButton.IsChecked == true) _scene.Children.Add(_wireframeModel);
+        }
+
+        // WPF 3D has no line primitive, so each edge is a thin triangular prism.
+        private static GeometryModel3D BuildWireframe(double[] edges, double radius)
+        {
+            var mesh = new MeshGeometry3D();
+            var count = Math.Min(edges.Length / 6, MaxWireframeEdges);
+            for (var i = 0; i < count; i++)
+            {
+                var a = new Point3D(edges[i * 6], edges[i * 6 + 1], edges[i * 6 + 2]);
+                var b = new Point3D(edges[i * 6 + 3], edges[i * 6 + 4], edges[i * 6 + 5]);
+                var direction = b - a;
+                if (direction.LengthSquared < 1e-18) continue;
+                direction.Normalize();
+                var helper = Math.Abs(direction.Z) < 0.9 ? new Vector3D(0, 0, 1) : new Vector3D(1, 0, 0);
+                var u = Vector3D.CrossProduct(direction, helper);
+                u.Normalize();
+                var v = Vector3D.CrossProduct(direction, u);
+                var baseIndex = mesh.Positions.Count;
+                for (var end = 0; end < 2; end++)
+                {
+                    var origin = end == 0 ? a : b;
+                    for (var corner = 0; corner < 3; corner++)
+                    {
+                        var angle = Math.PI / 2 + corner * 2 * Math.PI / 3;
+                        mesh.Positions.Add(origin + (u * Math.Cos(angle) + v * Math.Sin(angle)) * radius);
+                    }
+                }
+                for (var side = 0; side < 3; side++)
+                {
+                    var next = (side + 1) % 3;
+                    mesh.TriangleIndices.Add(baseIndex + side);
+                    mesh.TriangleIndices.Add(baseIndex + next);
+                    mesh.TriangleIndices.Add(baseIndex + 3 + next);
+                    mesh.TriangleIndices.Add(baseIndex + side);
+                    mesh.TriangleIndices.Add(baseIndex + 3 + next);
+                    mesh.TriangleIndices.Add(baseIndex + 3 + side);
+                }
+            }
+            var material = new DiffuseMaterial(Brushes.Black);
+            return new GeometryModel3D(mesh, material) { BackMaterial = material };
         }
 
         private static Point3D ReadPoint(double[] vertices, int index)

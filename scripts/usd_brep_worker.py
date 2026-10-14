@@ -59,8 +59,10 @@ def main() -> int:
         all_points = []
         all_normals = []
         all_triangles = []
+        all_edges = []
 
         for body in results:
+            seen_edges = set()
             mesh_body = body if isinstance(body, sm.PolyBrep) else sm.tessellate(
                 body,
                 chord_height_tolerance=0.005,
@@ -95,12 +97,23 @@ def main() -> int:
                 # so triangulate with local corner offsets rather than source indices.
                 for index in range(1, len(face) - 1):
                     all_triangles.extend((offset, offset + index, offset + index + 1))
+                # Wireframe segments follow the tessellated polygon outlines, so
+                # triangulation diagonals are not drawn. Edges shared by adjacent
+                # polygons are emitted once.
+                for corner, point_index in enumerate(face):
+                    next_index = face[(corner + 1) % len(face)]
+                    key = (min(point_index, next_index), max(point_index, next_index))
+                    if key in seen_edges:
+                        continue
+                    seen_edges.add(key)
+                    all_edges.extend(point_values[point_index])
+                    all_edges.extend(point_values[next_index])
                 cursor += count + 1
 
         if not all_triangles:
             raise RuntimeError("The script's `result` did not produce any displayable faces.")
         with open(mesh_path, "w", encoding="utf-8") as stream:
-            json.dump({"vertices": all_points, "normals": all_normals, "triangles": all_triangles}, stream)
+            json.dump({"vertices": all_points, "normals": all_normals, "triangles": all_triangles, "edges": all_edges}, stream)
         print("Displayed {} triangle(s).".format(len(all_triangles) // 3))
         return 0
     except Exception:

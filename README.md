@@ -6,7 +6,7 @@ A Visual Studio extension that runs NVIDIA USD BRep Python scripts and previews 
 
 - Runs the active, saved Python file against a local NVIDIA `usd-brep` build.
 - Shows the returned Brep (or list of Breps) as an interactive shaded triangle mesh in a dockable tool window.
-- Left-drag to orbit, scroll to zoom, and a **Home View** button to frame the model.
+- Left-drag to orbit, scroll to zoom, and a **Wireframe** toggle that overlays the tessellation mesh edges on the shaded model.
 - A **Browse...** button to select a different `usd-brep` checkout.
 - Errors and status messages are shown in the viewport status line.
 
@@ -47,7 +47,7 @@ result = sm.boolean_difference(
 
 Make that file the active Visual Studio document and click **Run Active Python File**. The extension saves the document, runs it with the repo's Python environment and DLLs from the selected USD BRep build, tessellates `result`, then updates the viewport. Assign a single Brep or a list of Breps to `result`.
 
-Drag with the left mouse button to orbit, scroll to zoom, and use **Home View** to frame the model.
+Drag with the left mouse button to orbit and scroll to zoom. Toggle **Wireframe** to overlay the tessellation edges. These are the tessellated polygon outlines, not exact CAD edges, and the overlay is capped at 200,000 edges for performance.
 
 ## Troubleshooting
 
