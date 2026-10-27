@@ -2,6 +2,8 @@
 
 A Visual Studio extension that runs NVIDIA USD BRep Python scripts and previews their NURBS-based models as tessellated meshes in a dockable 3D viewport. Modeling operations remain exact in USD BRep; the viewport displays a tessellated copy.
 
+![USD BRep Viewport displaying a muzzle brake model beside its Python script](images/viewport-preview.png)
+
 ## Features
 
 - Runs the active, saved Python file against a local NVIDIA `usd-brep` build.
